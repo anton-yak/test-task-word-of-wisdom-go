@@ -3,9 +3,10 @@ services:
     build:
       dockerfile: ./server.Dockerfile
     ports:
-      - 8080:${SERVER_PORT}
+      - ${SERVER_EXTERNAL_PORT}:${SERVER_PORT}
     environment:
       - SERVER_PORT=${SERVER_PORT}
+      - CLIENT_ANSWER_TIMEOUT=${CLIENT_ANSWER_TIMEOUT}
 
   client:
     build:

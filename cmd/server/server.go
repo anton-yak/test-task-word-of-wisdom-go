@@ -8,11 +8,15 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"os"
+	"strconv"
 	"strings"
 	"time"
 )
 
 const serverSalt = "this_is_a_salt"
+
+var clientAnswerTimeout int = 5
 
 var wordOfWisdom []string = []string{
 	"A Word of Wisdom, for the benefit of the council of high priests, assembled in Kirtland, and the church, and also the saints in Zion—",
@@ -38,6 +42,13 @@ var wordOfWisdom []string = []string{
 }
 
 func main() {
+	if os.Getenv("CLIENT_ANSWER_TIMEOUT") != "" {
+		timeout, err := strconv.Atoi(os.Getenv("CLIENT_ANSWER_TIMEOUT"))
+		if err != nil {
+			panic(err)
+		}
+		clientAnswerTimeout = timeout
+	}
 	ln, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		panic(err)
@@ -60,14 +71,19 @@ func generatePrefix(host string) string {
 }
 
 func handleConnection(conn net.Conn) {
-	defer conn.Close()
-
 	host, _, err := net.SplitHostPort(conn.RemoteAddr().String())
 	if err != nil {
 		return
 	}
+	defer func() {
+		fmt.Printf("Closing connection with %s\n", host)
+		conn.Close()
+	}()
+
 	prefix := generatePrefix(host)
 	conn.Write([]byte(prefix + "\n"))
+
+	conn.SetReadDeadline(time.Now().Add(time.Second * time.Duration(clientAnswerTimeout)))
 
 	reader := bufio.NewReader(conn)
 	answer, err := reader.ReadString('\n')

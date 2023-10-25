@@ -29,7 +29,7 @@ func main() {
 	prefix, err := reader.ReadString('\n')
 	if err != nil {
 		fmt.Println(err)
-		return
+		os.Exit(1)
 	}
 	prefix = strings.TrimRight(prefix, "\r\n")
 
@@ -45,7 +45,7 @@ func main() {
 	quote, err := reader.ReadString('\n')
 	if err != nil {
 		fmt.Println(err)
-		return
+		os.Exit(1)
 	}
 	fmt.Printf("quote: %s\n", quote)
 }
