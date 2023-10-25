@@ -1,0 +1,18 @@
+services:
+  server:
+    build:
+      dockerfile: ./server.Dockerfile
+    ports:
+      - 8080:${SERVER_PORT}
+    environment:
+      - SERVER_PORT=${SERVER_PORT}
+
+  client:
+    build:
+      dockerfile: ./client.Dockerfile
+    depends_on:
+      - server
+    restart: always
+    environment:
+      - SERVER_ADDR=server:${SERVER_PORT}
+    command: ["bash", "-c", "./client && sleep 2"]
